@@ -136,7 +136,7 @@ package body Dfa_Minimization is
                Queue (Tail) := St;
                Tail := Tail + 1;
             end if;
-         end loop;
+         end;
       end loop;
 
       while Head < Tail loop
@@ -170,7 +170,7 @@ package body Dfa_Minimization is
                New_Map (St) := State_Id (Count);
                Count := Count + 1;
             end if;
-         end loop;
+         end;
       end loop;
 
       if Count = 0 then
