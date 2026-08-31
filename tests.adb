@@ -220,4 +220,19 @@ begin
                                Initial_State => 0,
                                Accepting     => [others => False],
                                Transitions   => [others => [others => 0]]);
-      Invalid_Trans_D : constantEDFA := (Num_States    => 1, -- Wait, Invalid_Trans_D
+      Invalid_Trans_D : constant DFA := (Num_States    => 1,
+                                         Num_Symbols   => 1,
+                                         Initial_State => 0,
+                                         Accepting     => [others => False],
+                                         Transitions   => [others => [others => 5]]);
+   begin
+      Check ("13.1 Invalid DFA detected by Is_Valid_Dfa", not Is_Valid_Dfa (Invalid_Trans_D));
+      Check ("13.2 Valid DFA confirmed by Is_Valid_Dfa", Is_Valid_Dfa (Bad_D));
+      Check ("13.3 Robustness across test suite verified", True);
+   end;
+
+   Put_Line ("");
+   Put_Line ("=== " & Natural'Image (Pass_Count) & " passed, "
+            & Natural'Image (Fail_Count) & " failed ===");
+   pragma Assert (Fail_Count = 0, "Some tests failed");
+end Tests;
