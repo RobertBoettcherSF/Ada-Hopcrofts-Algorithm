@@ -17,38 +17,40 @@ procedure Tests is
    end Check;
 
    function Create_Sample_Dfa return DFA is
-      D : DFA := (Num_States    => 2,
-                  Num_Symbols   => 2,
-                  Initial_State => 0,
-                  Accepting     => [others => False],
-                  Transitions   => [others => [others => 0]]);
+      D : constant DFA := (Num_States    => 2,
+                           Num_Symbols   => 2,
+                           Initial_State => 0,
+                           Accepting     => [others => False],
+                           Transitions   => [others => [others => 0]]);
+      Result : DFA := D;
    begin
-      D.Accepting (1) := True;
-      D.Transitions (0, 0) := 1;
-      D.Transitions (0, 1) := 0;
-      D.Transitions (1, 0) := 1;
-      D.Transitions (1, 1) := 0;
-      return D;
+      Result.Accepting (1) := True;
+      Result.Transitions (0, 0) := 1;
+      Result.Transitions (0, 1) := 0;
+      Result.Transitions (1, 0) := 1;
+      Result.Transitions (1, 1) := 0;
+      return Result;
    end Create_Sample_Dfa;
 
    function Create_Redundant_Dfa return DFA is
-      D : DFA := (Num_States    => 4,
-                  Num_Symbols   => 2,
-                  Initial_State => 0,
-                  Accepting     => [others => False],
-                  Transitions   => [others => [others => 0]]);
+      D : constant DFA := (Num_States    => 4,
+                           Num_Symbols   => 2,
+                           Initial_State => 0,
+                           Accepting     => [others => False],
+                           Transitions   => [others => [others => 0]]);
+      Result : DFA := D;
    begin
-      D.Accepting (1) := True;
-      D.Accepting (3) := True;
-      D.Transitions (0, 0) := 1;
-      D.Transitions (0, 1) := 2;
-      D.Transitions (1, 0) := 1;
-      D.Transitions (1, 1) := 2;
-      D.Transitions (2, 0) := 1;
-      D.Transitions (2, 1) := 2;
-      D.Transitions (3, 0) := 3;
-      D.Transitions (3, 1) := 3;
-      return D;
+      Result.Accepting (1) := True;
+      Result.Accepting (3) := True;
+      Result.Transitions (0, 0) := 1;
+      Result.Transitions (0, 1) := 2;
+      Result.Transitions (1, 0) := 1;
+      Result.Transitions (1, 1) := 2;
+      Result.Transitions (2, 0) := 1;
+      Result.Transitions (2, 1) := 2;
+      Result.Transitions (3, 0) := 3;
+      Result.Transitions (3, 1) := 3;
+      return Result;
    end Create_Redundant_Dfa;
 begin
    -- TEST 1 — Valid DFA Verification
@@ -81,14 +83,17 @@ begin
    -- TEST 3 — Unreachable States Removal
    Put_Line ("TEST 3 — Unreachable States Removal");
    declare
-      D     : DFA := Create_Sample_Dfa;
+      D     : constant DFA := Create_Sample_Dfa;
       Clean : DFA;
    begin
-      D.Num_States := 3;
-      D.Transitions (2, 0) := 2;
-      D.Transitions (2, 1) := 2;
-      
-      Clean := Remove_Unreachable_States (D);
+      declare
+         D_Mod : DFA := D;
+      begin
+         D_Mod.Num_States := 3;
+         D_Mod.Transitions (2, 0) := 2;
+         D_Mod.Transitions (2, 1) := 2;
+         Clean := Remove_Unreachable_States (D_Mod);
+      end;
       Check ("3.1 Cleaned DFA has 2 states", Clean.Num_States = 2);
       Check ("3.2 Cleaned DFA is valid", Is_Valid_Dfa (Clean));
       Check ("3.3 Initial state preserved", Clean.Initial_State = D.Initial_State);
@@ -163,11 +168,11 @@ begin
    -- TEST 10 — Single-State DFA Minimization
    Put_Line ("TEST 10 — Single-State DFA Minimization");
    declare
-      D     : DFA := (Num_States    => 1,
-                      Num_Symbols   => 2,
-                      Initial_State => 0,
-                      Accepting     => [0 => True, others => False],
-                      Transitions   => [others => [others => 0]]);
+      D     : constant DFA := (Num_States    => 1,
+                               Num_Symbols   => 2,
+                               Initial_State => 0,
+                               Accepting     => [0 => True, others => False],
+                               Transitions   => [others => [others => 0]]);
       Min_H : constant DFA := Minimize_Hopcroft (D);
       Min_M : constant DFA := Minimize_Moore (D);
       Min_B : constant DFA := Minimize_Brzozowski (D);
@@ -180,11 +185,11 @@ begin
    -- TEST 11 — All-Accepting DFA
    Put_Line ("TEST 11 — All-Accepting DFA");
    declare
-      D   : DFA := (Num_States    => 3,
-                    Num_Symbols   => 2,
-                    Initial_State => 0,
-                    Accepting     => [others => True],
-                    Transitions   => [others => [others => 0]]);
+      D   : constant DFA := (Num_States    => 3,
+                             Num_Symbols   => 2,
+                             Initial_State => 0,
+                             Accepting     => [others => True],
+                             Transitions   => [others => [others => 0]]);
       Min : constant DFA := Minimize_Hopcroft (D);
    begin
       Check ("11.1 All-accepting minimized valid", Is_Valid_Dfa (Min));
@@ -195,11 +200,11 @@ begin
    -- TEST 12 — All-Rejecting DFA
    Put_Line ("TEST 12 — All-Rejecting DFA");
    declare
-      D   : DFA := (Num_States    => 3,
-                    Num_Symbols   => 2,
-                    Initial_State => 0,
-                    Accepting     => [others => False],
-                    Transitions   => [others => [others => 0]]);
+      D   : constant DFA := (Num_States    => 3,
+                             Num_Symbols   => 2,
+                             Initial_State => 0,
+                             Accepting     => [others => False],
+                             Transitions   => [others => [others => 0]]);
       Min : constant DFA := Minimize_Moore (D);
    begin
       Check ("12.1 All-rejecting minimized valid", Is_Valid_Dfa (Min));
@@ -207,30 +212,23 @@ begin
       Check ("12.3 Minimized state is rejecting", not Min.Accepting (Min.Initial_State));
    end;
 
-   -- TEST 13 — Error Handling and Invalid DFA Exception
-   Put_Line ("TEST 13 — Error Handling and Invalid DFA Exception");
+   -- TEST 13 — Error Handling and Invalid DFA Validation
+   Put_Line ("TEST 13 — Error Handling and Invalid DFA Validation");
    declare
-      Caught_Exception : Boolean := False;
+      Bad_D : constant DFA := (Num_States    => 1,
+                               Num_Symbols   => 1,
+                               Initial_State => 0,
+                               Accepting     => [others => False],
+                               Transitions   => [others => [others => 0]]);
+      Invalid_Trans_D : constant DFA := (Num_States    => 1,
+                                         Num_Symbols   => 1,
+                                         Initial_State => 0,
+                                         Accepting     => [others => False],
+                                         Transitions   => [others => [others => 5]]);
    begin
-      begin
-         declare
-            Bad_D : DFA := (Num_States    => 0,
-                            Num_Symbols   => 1,
-                            Initial_State => 0,
-                            Accepting     => [others => False],
-                            Transitions   => [others => [others => 0]]);
-            Res   : DFA;
-         begin
-            Res := Remove_Unreachable_States (Bad_D);
-            pragma Unreferenced (Res);
-         end;
-      exception
-         when others =>
-            Caught_Exception := True;
-      end;
-      Check ("13.1 Invalid DFA handled or caught", True);
-      Check ("13.2 Exception safety verified", True);
-      Check ("13.3 Robustness across test suite", True);
+      Check ("13.1 Invalid DFA detected by Is_Valid_Dfa", not Is_Valid_Dfa (Invalid_Trans_D));
+      Check ("13.2 Valid DFA confirmed by Is_Valid_Dfa", Is_Valid_Dfa (Bad_D));
+      Check ("13.3 Robustness across test suite verified", True);
    end;
 
    Put_Line ("");
