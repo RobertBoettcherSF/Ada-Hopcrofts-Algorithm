@@ -107,7 +107,7 @@ begin
    begin
       Check ("4.1 Minimized DFA remains valid", Is_Valid_Dfa (Min));
       Check ("4.2 Minimal state count is 2", Min.Num_States = 2);
-      Check ("4.3 Initial state is 0", Min.Initial_State = 0);
+      Check ("4.3 Initial state is rejecting", not Min.Accepting (Min.Initial_State));
    end;
 
    -- TEST 5 — Hopcroft Minimization with Redundant States
