@@ -20,8 +20,8 @@ procedure Tests is
       D : DFA := (Num_States    => 2,
                   Num_Symbols   => 2,
                   Initial_State => 0,
-                  Accepting     => (others => False),
-                  Transitions   => (others => (others => 0)));
+                  Accepting     => [others => False],
+                  Transitions   => [others => [others => 0]]);
    begin
       D.Accepting (1) := True;
       D.Transitions (0, 0) := 1;
@@ -35,8 +35,8 @@ procedure Tests is
       D : DFA := (Num_States    => 4,
                   Num_Symbols   => 2,
                   Initial_State => 0,
-                  Accepting     => (others => False),
-                  Transitions   => (others => (others => 0)));
+                  Accepting     => [others => False],
+                  Transitions   => [others => [others => 0]]);
    begin
       D.Accepting (1) := True;
       D.Accepting (3) := True;
@@ -74,7 +74,7 @@ begin
       Check ("2.2 Out of bounds initial state is invalid", not Is_Valid_Dfa (Bad_D));
 
       Bad_D := Create_Sample_Dfa;
-      Bad_D.Transitions (0, 0) := 50;
+      Bad_D.Transitions (0, 0) := 10;
       Check ("2.3 Out of bounds transition target is invalid", not Is_Valid_Dfa (Bad_D));
    end;
 
@@ -146,7 +146,7 @@ begin
    begin
       Check ("8.1 Brzozowski minimized DFA is valid", Is_Valid_Dfa (Min));
       Check ("8.2 State count is minimal", Min.Num_States <= 2);
-      Check ("8.3 Initial state is valid", Min.Initial_State < Min.Num_States);
+      Check ("8.3 Initial state is valid", State_Count (Min.Initial_State) < Min.Num_States);
    end;
 
    -- TEST 9 — Brzozowski Minimization with Redundant States
@@ -166,8 +166,8 @@ begin
       D     : DFA := (Num_States    => 1,
                       Num_Symbols   => 2,
                       Initial_State => 0,
-                      Accepting     => (0 => True, others => False),
-                      Transitions   => (others => (others => 0)));
+                      Accepting     => [0 => True, others => False],
+                      Transitions   => [others => [others => 0]]);
       Min_H : constant DFA := Minimize_Hopcroft (D);
       Min_M : constant DFA := Minimize_Moore (D);
       Min_B : constant DFA := Minimize_Brzozowski (D);
@@ -183,8 +183,8 @@ begin
       D   : DFA := (Num_States    => 3,
                     Num_Symbols   => 2,
                     Initial_State => 0,
-                    Accepting     => (others => True),
-                    Transitions   => (others => (others => 0)));
+                    Accepting     => [others => True],
+                    Transitions   => [others => [others => 0]]);
       Min : constant DFA := Minimize_Hopcroft (D);
    begin
       Check ("11.1 All-accepting minimized valid", Is_Valid_Dfa (Min));
@@ -198,8 +198,8 @@ begin
       D   : DFA := (Num_States    => 3,
                     Num_Symbols   => 2,
                     Initial_State => 0,
-                    Accepting     => (others => False),
-                    Transitions   => (others => (others => 0)));
+                    Accepting     => [others => False],
+                    Transitions   => [others => [others => 0]]);
       Min : constant DFA := Minimize_Moore (D);
    begin
       Check ("12.1 All-rejecting minimized valid", Is_Valid_Dfa (Min));
@@ -217,8 +217,8 @@ begin
             Bad_D : DFA := (Num_States    => 0,
                             Num_Symbols   => 1,
                             Initial_State => 0,
-                            Accepting     => (others => False),
-                            Transitions   => (others => (others => 0)));
+                            Accepting     => [others => False],
+                            Transitions   => [others => [others => 0]]);
             Res   : DFA;
          begin
             Res := Remove_Unreachable_States (Bad_D);
