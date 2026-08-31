@@ -92,122 +92,6 @@ package body Dfa_Minimization is
       return Result;
    end Remove_Unreachable_States;
 
-   function Remove_Unreachable_And_Dead_States (Original : DFA) return DFA is
-      Reachable    : State_Set := [others => False];
-      Co_Reachable : State_Set := [others => False];
-      Queue        : array (0 .. Max_States - 1) of State_Id;
-      Head         : Natural := 0;
-      Tail         : Natural := 0;
-      Curr         : State_Id;
-      Next_St      : State_Id;
-      New_Map      : array (State_Id) of State_Id := [others => 0];
-      Count        : State_Count := 0;
-      Result       : DFA := (Num_States    => 0,
-                             Num_Symbols   => Original.Num_Symbols,
-                             Initial_State => 0,
-                             Accepting     => [others => False],
-                             Transitions   => [others => [others => 0]]);
-   begin
-      Queue (Tail) := Original.Initial_State;
-      Tail := Tail + 1;
-      Reachable (Original.Initial_State) := True;
-
-      while Head < Tail loop
-         Curr := Queue (Head);
-         Head := Head + 1;
-         for Sym in 0 .. Original.Num_Symbols - 1 loop
-            Next_St := Original.Transitions (Curr, Symbol_Id (Sym));
-            if not Reachable (Next_St) then
-               Reachable (Next_St) := True;
-               Queue (Tail) := Next_St;
-               Tail := Tail + 1;
-            end if;
-         end loop;
-      end loop;
-
-      Head := 0;
-      Tail := 0;
-      for S in 0 .. Original.Num_States - 1 loop
-         declare
-            St : constant State_Id := State_Id (S);
-         begin
-            if Reachable (St) and then Original.Accepting (St) then
-               Co_Reachable (St) := True;
-               Queue (Tail) := St;
-               Tail := Tail + 1;
-            end if;
-         end;
-      end loop;
-
-      while Head < Tail loop
-         Curr := Queue (Head);
-         Head := Head + 1;
-         for Prev_S in 0 .. Original.Num_States - 1 loop
-            declare
-               Prev : constant State_Id := State_Id (Prev_S);
-            begin
-               if Reachable (Prev) and then not Co_Reachable (Prev) then
-                  for Sym in 0 .. Original.Num_Symbols - 1 loop
-                     if Original.Transitions (Prev, Symbol_Id (Sym)) = Curr then
-                        Co_Reachable (Prev) := True;
-                        Queue (Tail) := Prev;
-                        Tail := Tail + 1;
-                        exit;
-                     end if;
-                  end loop;
-               end if;
-            end;
-         end loop;
-      end loop;
-
-      Co_Reachable (Original.Initial_State) := True;
-
-      for S in 0 .. Original.Num_States - 1 loop
-         declare
-            St : constant State_Id := State_Id (S);
-         begin
-            if Reachable (St) and then Co_Reachable (St) then
-               New_Map (St) := State_Id (Count);
-               Count := Count + 1;
-            end if;
-         end;
-      end loop;
-
-      if Count = 0 then
-         raise Invalid_Dfa;
-      end if;
-
-      Result.Num_States := Count;
-      Result.Initial_State := New_Map (Original.Initial_State);
-
-      for S in 0 .. Original.Num_States - 1 loop
-         declare
-            St : constant State_Id := State_Id (S);
-         begin
-            if Reachable (St) and then Co_Reachable (St) then
-               if Original.Accepting (St) then
-                  Result.Accepting (New_Map (St)) := True;
-               end if;
-               for Sym in 0 .. Original.Num_Symbols - 1 loop
-                  declare
-                     Sym_Id : constant Symbol_Id := Symbol_Id (Sym);
-                     Dest   : constant State_Id := Original.Transitions (St, Sym_Id);
-                  begin
-                     if Reachable (Dest) and then Co_Reachable (Dest) then
-                        Result.Transitions (New_Map (St), Sym_Id) := New_Map (Dest);
-                     else
-                        Result.Transitions (New_Map (St), Sym_Id) := Result.Initial_State;
-                     end if;
-                  end;
-               end loop;
-            end if;
-         end;
-      end loop;
-
-      Result.Num_Symbols := Original.Num_Symbols;
-      return Result;
-   end Remove_Unreachable_And_Dead_States;
-
    -- Moore's Algorithm Implementation
    function Minimize_Moore (Original : DFA) return DFA is
       Clean_Orig : constant DFA := Remove_Unreachable_States (Original);
@@ -746,7 +630,7 @@ package body Dfa_Minimization is
 
       declare
          Interm_Dfa   : constant DFA := Powerset_Construct (N, NFA_Init, NFA_Acc, NFA_Trans);
-         Clean_Interm : constant DFA := Remove_Unreachable_And_Dead_States (Interm_Dfa);
+         Clean_Interm : constant DFA := Remove_Unreachable_States (Interm_Dfa);
          
          Int_N        : constant State_Count := Clean_Interm.Num_States;
          Int_K        : constant Symbol_Count := Clean_Interm.Num_Symbols;
@@ -775,7 +659,7 @@ package body Dfa_Minimization is
 
          Int_NFA_Acc (Clean_Interm.Initial_State) := True;
 
-         return Remove_Unreachable_And_Dead_States (Powerset_Construct (Int_N, Int_NFA_Init, Int_NFA_Acc, Int_NFA_Trans));
+         return Remove_Unreachable_States (Powerset_Construct (Int_N, Int_NFA_Init, Int_NFA_Acc, Int_NFA_Trans));
       end;
    end Minimize_Brzozowski;
 
