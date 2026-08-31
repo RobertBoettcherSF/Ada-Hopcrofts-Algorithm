@@ -2,18 +2,18 @@ package body Dfa_Minimization is
 
    function Is_Valid_Dfa (D : DFA) return Boolean is
    begin
-      if D.Num_States = 0 or else D.Num_States > Max_States then
+      if D.Num_States = 0 then
          return False;
       end if;
-      if D.Num_Symbols = 0 or else D.Num_Symbols > Max_Symbols then
+      if D.Num_Symbols = 0 then
          return False;
       end if;
-      if D.Initial_State >= D.Num_States then
+      if Natural (D.Initial_State) >= Natural (D.Num_States) then
          return False;
       end if;
       for S in 0 .. D.Num_States - 1 loop
          for Sym in 0 .. D.Num_Symbols - 1 loop
-            if D.Transitions (State_Id (S), Symbol_Id (Sym)) >= D.Num_States then
+            if Natural (D.Transitions (State_Id (S), Symbol_Id (Sym))) >= Natural (D.Num_States) then
                return False;
             end if;
          end loop;
@@ -22,19 +22,19 @@ package body Dfa_Minimization is
    end Is_Valid_Dfa;
 
    function Remove_Unreachable_States (Original : DFA) return DFA is
-      Reachable : State_Set := (others => False);
+      Reachable : State_Set := [others => False];
       Queue     : array (0 .. Max_States - 1) of State_Id;
       Head      : Natural := 0;
       Tail      : Natural := 0;
       Curr      : State_Id;
       Next_St   : State_Id;
-      New_Map   : array (State_Id) of State_Id := (others => 0);
+      New_Map   : array (State_Id) of State_Id := [others => 0];
       Count     : State_Count := 0;
       Result    : DFA := (Num_States    => 0,
                           Num_Symbols   => Original.Num_Symbols,
                           Initial_State => 0,
-                          Accepting     => (others => False),
-                          Transitions   => (others => (others => 0)));
+                          Accepting     => [others => False],
+                          Transitions   => [others => [others => 0]]);
    begin
       -- BFS to find reachable states
       Queue (Tail) := Original.Initial_State;
@@ -99,7 +99,7 @@ package body Dfa_Minimization is
       K          : constant Symbol_Count := Clean_Orig.Num_Symbols;
       
       type Partition_Array is array (State_Id) of State_Id;
-      Current_P  : Partition_Array := (others => 0);
+      Current_P  : Partition_Array := [others => 0];
       Num_Blocks : State_Id := 0;
       Changed    : Boolean;
    begin
@@ -128,7 +128,7 @@ package body Dfa_Minimization is
          Changed := False;
          -- Refine partition
          declare
-            New_Blocks : array (State_Id) of State_Id := (others => 0);
+            New_Blocks : Partition_Array := [others => 0];
             Next_Num_B : State_Id := 0;
             
             type State_Trans_Array is array (Symbol_Id) of State_Id;
@@ -207,10 +207,10 @@ package body Dfa_Minimization is
          Result         : DFA := (Num_States    => State_Count (Num_Blocks),
                                   Num_Symbols   => K,
                                   Initial_State => Current_P (Clean_Orig.Initial_State),
-                                  Accepting     => (others => False),
-                                  Transitions   => (others => (others => 0)));
-         Representative : array (State_Id) of State_Id := (others => 0);
-         Rep_Found      : array (State_Id) of Boolean := (others => False);
+                                  Accepting     => [others => False],
+                                  Transitions   => [others => [others => 0]]);
+         Representative : array (State_Id) of State_Id := [others => 0];
+         Rep_Found      : array (State_Id) of Boolean := [others => False];
       begin
          for S in 0 .. N - 1 loop
             declare
@@ -255,14 +255,14 @@ package body Dfa_Minimization is
 
       type Set_Array is array (0 .. Max_States - 1) of State_Set;
       
-      P      : Set_Array := (others => (others => False));
+      P      : Set_Array := [others => [others => False]];
       P_Size : Natural := 2;
       
-      W      : Set_Array := (others => (others => False));
+      W      : Set_Array := [others => [others => False]];
       W_Size : Natural := 2;
 
       function Intersect (S1, S2 : State_Set) return State_Set is
-         Res : State_Set := (others => False);
+         Res : State_Set := [others => False];
       begin
          for I in 0 .. N - 1 loop
             Res (State_Id (I)) := S1 (State_Id (I)) and S2 (State_Id (I));
@@ -271,7 +271,7 @@ package body Dfa_Minimization is
       end Intersect;
 
       function Difference (S1, S2 : State_Set) return State_Set is
-         Res : State_Set := (others => False);
+         Res : State_Set := [others => False];
       begin
          for I in 0 .. N - 1 loop
             Res (State_Id (I)) := S1 (State_Id (I)) and not S2 (State_Id (I));
@@ -301,7 +301,7 @@ package body Dfa_Minimization is
       end Cardinality;
 
       function Predecessors (A : State_Set; Sym : Symbol_Id) return State_Set is
-         Res : State_Set := (others => False);
+         Res : State_Set := [others => False];
       begin
          for I in 0 .. N - 1 loop
             declare
@@ -317,8 +317,8 @@ package body Dfa_Minimization is
       end Predecessors;
    begin
       declare
-         F_Set : State_Set := (others => False);
-         Not_F : State_Set := (others => False);
+         F_Set : State_Set := [others => False];
+         Not_F : State_Set := [others => False];
       begin
          for I in 0 .. N - 1 loop
             declare
@@ -441,10 +441,10 @@ package body Dfa_Minimization is
          Result         : DFA := (Num_States    => State_Count (P_Size),
                                   Num_Symbols   => K,
                                   Initial_State => 0,
-                                  Accepting     => (others => False),
-                                  Transitions   => (others => (others => 0)));
-         State_To_Block : array (State_Id) of State_Id := (others => 0);
-         Rep_State      : array (State_Id) of State_Id := (others => 0);
+                                  Accepting     => [others => False],
+                                  Transitions   => [others => [others => 0]]);
+         State_To_Block : array (State_Id) of State_Id := [others => 0];
+         Rep_State      : array (State_Id) of State_Id := [others => 0];
       begin
          for B_Idx in 0 .. P_Size - 1 loop
             declare
@@ -506,11 +506,11 @@ package body Dfa_Minimization is
                                    NFA_Accepting    : State_Set;
                                    NFA_Trans        : Nfa_Transition_Table) return DFA is
          type Subset_Array is array (0 .. Max_States - 1) of State_Set;
-         Subsets      : Subset_Array := (others => (others => False));
+         Subsets      : Subset_Array := [others => [others => False]];
          Sub_Count    : Natural := 0;
          
-         Trans_Table  : array (State_Id, Symbol_Id) of State_Id := (others => (others => 0));
-         Is_Accepting : array (State_Id) of Boolean := (others => False);
+         Trans_Table  : Transition_Table := [others => [others => 0]];
+         Is_Accepting : State_Set := [others => False];
          
          Head         : Natural := 0;
          Tail         : Natural := 0;
@@ -569,7 +569,7 @@ package body Dfa_Minimization is
                for Sym_Idx in 0 .. K - 1 loop
                   declare
                      Sym      : constant Symbol_Id := Symbol_Id (Sym_Idx);
-                     Next_Set : State_Set := (others => False);
+                     Next_Set : State_Set := [others => False];
                   begin
                      for I in 0 .. NFA_States_Count - 1 loop
                         declare
@@ -602,9 +602,9 @@ package body Dfa_Minimization is
                  Transitions   => Trans_Table);
       end Powerset_Construct;
 
-      NFA_Trans : Nfa_Transition_Table := (others => (others => (others => False)));
-      NFA_Init  : State_Set := (others => False);
-      NFA_Acc   : State_Set := (others => False);
+      NFA_Trans : Nfa_Transition_Table := [others => [others => [others => False]]];
+      NFA_Init  : State_Set := [others => False];
+      NFA_Acc   : State_Set := [others => False];
       N         : constant State_Count := Clean_Orig.Num_States;
    begin
       for I in 0 .. N - 1 loop
@@ -634,9 +634,9 @@ package body Dfa_Minimization is
          Int_N        : constant State_Count := Clean_Interm.Num_States;
          Int_K        : constant Symbol_Count := Clean_Interm.Num_Symbols;
          
-         Int_NFA_Trans : Nfa_Transition_Table := (others => (others => (others => False)));
-         Int_NFA_Init  : State_Set := (others => False);
-         Int_NFA_Acc   : State_Set := (others => False);
+         Int_NFA_Trans : Nfa_Transition_Table := [others => [others => [others => False]]];
+         Int_NFA_Init  : State_Set := [others => False];
+         Int_NFA_Acc   : State_Set := [others => False];
       begin
          for I in 0 .. Int_N - 1 loop
             declare
