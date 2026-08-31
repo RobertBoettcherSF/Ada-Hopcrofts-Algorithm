@@ -131,10 +131,11 @@ package body Dfa_Minimization is
             New_Blocks : array (State_Id) of State_Id := (others => 0);
             Next_Num_B : State_Id := 0;
             
+            type State_Trans_Array is array (Symbol_Id) of State_Id;
             type Signature_Record is record
                Accepting : Boolean;
                Block     : State_Id;
-               Trans     : array (Symbol_Id range 0 .. Max_Symbols - 1) of State_Id;
+               Trans     : State_Trans_Array;
             end record;
             
             Sigs : array (State_Id) of Signature_Record;
@@ -498,10 +499,12 @@ package body Dfa_Minimization is
       Clean_Orig : constant DFA := Remove_Unreachable_States (Original);
       K          : constant Symbol_Count := Clean_Orig.Num_Symbols;
 
+      type Nfa_Transition_Table is array (State_Id, Symbol_Id) of State_Set;
+
       function Powerset_Construct (NFA_States_Count : State_Count;
                                    NFA_Initial      : State_Set;
                                    NFA_Accepting    : State_Set;
-                                   NFA_Trans        : array (State_Id, Symbol_Id) of State_Set) return DFA is
+                                   NFA_Trans        : Nfa_Transition_Table) return DFA is
          type Subset_Array is array (0 .. Max_States - 1) of State_Set;
          Subsets      : Subset_Array := (others => (others => False));
          Sub_Count    : Natural := 0;
@@ -599,7 +602,7 @@ package body Dfa_Minimization is
                  Transitions   => Trans_Table);
       end Powerset_Construct;
 
-      NFA_Trans : array (State_Id, Symbol_Id) of State_Set := (others => (others => (others => False)));
+      NFA_Trans : Nfa_Transition_Table := (others => (others => (others => False)));
       NFA_Init  : State_Set := (others => False);
       NFA_Acc   : State_Set := (others => False);
       N         : constant State_Count := Clean_Orig.Num_States;
@@ -631,7 +634,7 @@ package body Dfa_Minimization is
          Int_N        : constant State_Count := Clean_Interm.Num_States;
          Int_K        : constant Symbol_Count := Clean_Interm.Num_Symbols;
          
-         Int_NFA_Trans : array (State_Id, Symbol_Id) of State_Set := (others => (others => (others => False)));
+         Int_NFA_Trans : Nfa_Transition_Table := (others => (others => (others => False)));
          Int_NFA_Init  : State_Set := (others => False);
          Int_NFA_Acc   : State_Set := (others => False);
       begin
